@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Portfolio Tracker</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script defer src="script.js"></script>
+    
+    <style>
+
+        .custom-chart-size {
+              width: 400px; 
+              height: 400px; 
+          }
+  
+          @media (max-width: 640px) {
+              .custom-chart-size {
+                  width: 300px;
+                  height: 300px;
+              }
+          }
+  
+          @media (min-width: 768px) {
+              .custom-chart-size {
+                  width: 500px;
+                  height: 500px;
+              }
+          }
+      </style>
+    
+    
+    
+</head>
+<body class=" bg-grsy-100 text-gray-800">
+
+      <!-- Navbar -->
+      <nav class="w-full h-20 flex items-center justify-between bg-gray-400 px-6">
+
+        <div id="brand">
+            <a href="index.html" class="text-2xl md:text-3xl font-bold text-white hover:text-black transition duration-300">Investment Portfolio Tracker</a>
+        </div>
+
+
+        <ul id="menu" class="hidden md:flex space-x-6">
+            <li>
+                <a href="index.html" class="text-white hover:text-black transition duration-300 font-bold">Home</a>
+            </li>
+            <li>
+                <a href="#breakdown" class="text-white hover:text-black transition duration-300 font-bold">Breakdown</a>
+            </li>
+            <li>
+              <a href="#Investments" class="text-white hover:text-black transition duration-300 font-bold">Investments</a>
+          </li>
+        </ul>
+
+
+        <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-white focus:outline-none" aria-label="Toggle menu" aria-expanded="false">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-700">
+        <ul class="flex flex-col space-y-4 p-4">
+            <li>
+                <a href="index.html" class="text-white hover:text-gray-300 transition duration-300">Home</a>
+            </li>
+            <li>
+                <a href="#breakdown" class="text-white hover:text-gray-300 transition duration-300">Breakdown</a>
+            </li>
+            <li>
+              <a href="#Investments" class="text-white hover:text-gray-300 transition duration-300">Investments</a>
+          </li>
+        </ul>
+    </div>
+
+
+
+    <div class="container mx-auto p-8">
+
+        <div class="bg-white p-6 hover:bg-gray-100 rounded-lg shadow-lg mb-8">
+            <h2 class="text-2xl font-bold mb-4">Total Portfolio Value: $<span id="totalValue">0.00</span></h2>
+        </div>
+
+
+        <div class="flex justify-end mb-4">
+            <button id="addInvestmentBtn" class="bg-green-500 text-white hover:bg-green-600 px-4 py-2 rounded">Add New Investment</button>
+        </div>
+
+
+        <div id="addInvestmentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                <h2 class="text-2xl font-bold mb-4">Add New Investment</h2>
+                <form id="investmentForm">
+                    <div class="mb-4">
+                        <label for="name" class="block text-gray-700">Asset Name:</label>
+                        <input type="text" id="name" class="w-full p-2 border border-gray-300 rounded" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="amount" class="block text-gray-700">Amount Invested ($):</label>
+                        <input type="number" id="amount" class="w-full p-2 border border-gray-300 rounded" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="currentValue" class="block text-gray-700">Current Value ($):</label>
+                        <input type="number" id="currentValue" class="w-full p-2 border border-gray-300 rounded" min="0" step="0.01" required>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" id="closeAddModal" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Add Investment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="bg-indigo-100 p-6 rounded-lg shadow-lg mb-8 overflow-x-auto">
+            <h2 class="text-3xl font-bold mb-4"  id="Investments">Current Investments</h2>
+            <table class="min-w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-400">
+                        <th class="px-4 py-2">Asset Name</th>
+                        <th class="px-4 py-2">Amount Invested ($)</th>
+                        <th class="px-4 py-2">Current Value ($)</th>
+                        <th class="px-4 py-2">% Change</th>
+                        <th class="px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="investmentTable">
+
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="bg-indigo-100 p-6 rounded-lg shadow-lg">
+            <h2 class="text-3xl font-bold mb-4" id="breakdown">Investment Breakdown</h2>
+            <div class="flex justify-center">
+            <canvas id="investmentChart" class="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="updateInvestmentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-4">Update Investment</h2>
+            <form id="updateInvestmentForm">
+                <input type="hidden" id="updateIndex">
+                <div class="mb-4">
+                    <label for="updateName" class="block text-gray-700">Asset Name:</label>
+                    <input type="text" id="updateName" class="w-full p-2 border border-gray-300 rounded" disabled>
+                </div>
+                <div class="mb-4">
+                    <label for="updateAmount" class="block text-gray-700">Amount Invested ($):</label>
+                    <input type="number" id="updateAmount" class="w-full p-2 border border-gray-300 rounded" disabled>
+                </div>
+                <div class="mb-4">
+                    <label for="updateCurrentValue" class="block text-gray-700">Current Value ($):</label>
+                    <input type="number" id="updateCurrentValue" class="w-full p-2 border border-gray-300 rounded" min="0" step="0.01" required>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="closeUpdateModal" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Update Investment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      mobileMenuButton.addEventListener('click', () => {
+          const isHidden = mobileMenu.classList.toggle('hidden');
+          mobileMenuButton.setAttribute('aria-expanded', !isHidden);
+      });
+  </script>
+
+
+
+</body>
+</html>
